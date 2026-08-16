@@ -64,7 +64,7 @@ class MediaOverlay:
         self.frames=[]
         for frame in ImageSequence.Iterator(image):
             duration=max(20,int(frame.info.get("duration",80)))
-            resized=frame.convert("RGBA").resize((width,height),Image.Resampling.LANCZOS)
+            resized=frame.convert("RGBA").resize((width,height),Image.Resampling.BILINEAR)
             self.frames.append((resized.copy(),duration))
         self.frame_index=0;self._show_gif_frame()
 
@@ -105,7 +105,10 @@ class MediaOverlay:
         if not ok:
             self.capture.set(cv2.CAP_PROP_POS_FRAMES,0);self.video_source_time=0;ok,frame=self.capture.read()
         if ok:
+            if (frame.shape[1],frame.shape[0])!=self.video_size:
+                frame=cv2.resize(frame,self.video_size,interpolation=cv2.INTER_AREA)
             frame=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-            image=Image.fromarray(frame).resize(self.video_size,Image.Resampling.LANCZOS)
-            self.photo=ImageTk.PhotoImage(image);self.label.configure(image=self.photo)
-        if not ended:self.job=self.root.after(16,self._show_video_frame)
+            self.photo=ImageTk.PhotoImage(Image.fromarray(frame));self.label.configure(image=self.photo)
+        if not ended:
+            display_fps=min(30.0,max(1.0,self.video_fps))
+            self.job=self.root.after(max(16,int(1000/display_fps)),self._show_video_frame)

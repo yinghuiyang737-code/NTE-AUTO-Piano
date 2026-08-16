@@ -1,0 +1,16 @@
+{
+  "sync_nodes": [
+    {
+      "music": 0,
+      "video": 0
+    },
+    {
+      "music": 30.0,
+      "video": 29.5
+    },
+    {
+      "music": 60.0,
+      "video": 61.2
+    }
+  ]
+}
